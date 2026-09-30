@@ -5,10 +5,12 @@ using CurriculumGenerator.Services;
 using CurriculumGenerator.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -119,6 +121,16 @@ builder.Services.AddSingleton(TimeProvider.System);
 var app = builder.Build();
 
 // 8. Pipeline
+// Render terminates TLS and proxies to us over plain HTTP; trusting the
+// forwarded headers keeps the real scheme visible (redirects, auth).
+var forwardedHeaders = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+forwardedHeaders.KnownNetworks.Clear();
+forwardedHeaders.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeaders);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -133,6 +145,8 @@ if (!app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+// Cheap liveness probe for Render's health check and keep-alive pings.
+app.MapGet("/health", () => Results.Ok("ok"));
 
 // Serve the built SPA (FrontEnd/dist) so `dotnet run` alone delivers the full app.
 var frontendDist = Path.Combine(builder.Environment.ContentRootPath, "..", "FrontEnd", "dist");
@@ -143,6 +157,27 @@ if (Directory.Exists(frontendDist))
     app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = fileProvider });
     app.UseStaticFiles(new StaticFileOptions { FileProvider = fileProvider });
     app.MapFallbackToFile("index.html", new StaticFileOptions { FileProvider = fileProvider });
+}
+
+// 9. Apply pending migrations before serving: the hosted database (Supabase/Neon)
+// starts empty, and a cold one may refuse the first connection for a moment.
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var migrateLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    for (var attempt = 1; ; attempt++)
+    {
+        try
+        {
+            db.Database.Migrate();
+            break;
+        }
+        catch (NpgsqlException ex) when (attempt < 10)
+        {
+            migrateLogger.LogWarning(ex, "Banco ainda não acessível (tentativa {Attempt}/10); nova tentativa em 3s...", attempt);
+            await Task.Delay(TimeSpan.FromSeconds(3));
+        }
+    }
 }
 
 app.Run();

@@ -1,0 +1,31 @@
+# Render Blueprint: em https://dashboard.render.com escolha "New > Blueprint",
+# aponte para este repositório e preencha os segredos (sync: false) quando pedirem.
+services:
+  - type: web
+    name: curriculumgen-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthcheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # Cole a connection string do Supabase/Neon (passo 1 do DEPLOY.md)
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      # Gere com: openssl rand -base64 48
+      - key: Jwt__Key
+        sync: false
+      - key: Jwt__Issuer
+        value: CurriculumGenerator
+      - key: Jwt__Audience
+        value: CurriculumGeneratorFrontend
+      - key: Groq__ApiKey
+        sync: false
+      - key: Groq__Model
+        value: openai/gpt-oss-120b
+      # Só se for usar pagamentos; BackendUrl = https://curriculumgen-api.onrender.com
+      - key: MercadoPago__AccessToken
+        sync: false
+      - key: MercadoPago__BackendUrl
+        sync: false
