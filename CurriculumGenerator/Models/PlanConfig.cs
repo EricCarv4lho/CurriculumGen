@@ -4,16 +4,17 @@ public static class PlanConfig
 {
     public static readonly Dictionary<string, PlanDefinition> Plans = new()
     {
+        // TODO: tighten back before going to production — while testing, free users have everything.
         ["free"] = new PlanDefinition
         {
             Name = "Free",
-            MaxResumes = 1,
-            MaxTemplates = 1,
-            MaxDownloadsPerMonth = 3,
-            MaxTranslations = 0,
-            MaxAiImproves = 0,
-            MaxCoverLetters = 0,
-            TemplatesAvailable = new[] { "classic" },
+            MaxResumes = null,
+            MaxTemplates = null,
+            MaxDownloadsPerMonth = null,
+            MaxTranslations = null,
+            MaxAiImproves = null,
+            MaxCoverLetters = null,
+            TemplatesAvailable = new[] { "classic", "modern", "executive", "creative" },
             PriceMonthly = 0
         },
         ["pro"] = new PlanDefinition

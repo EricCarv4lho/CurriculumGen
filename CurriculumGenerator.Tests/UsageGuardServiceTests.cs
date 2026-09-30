@@ -30,10 +30,10 @@ public class UsageGuardServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task FreePlan_ZeroLimit_Throws()
+    public async Task PlanWithZeroLimit_Throws()
     {
         await Assert.ThrowsAsync<UsageLimitException>(
-            () => _guard.EnforceLimitAsync("user1", "free", UsageAction.CoverLetter));
+            () => _guard.EnforceLimitAsync("user1", "one_time", UsageAction.CoverLetter));
     }
 
     [Fact]
