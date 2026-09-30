@@ -14,11 +14,13 @@ public class AiSuggestionService : IAiSuggestionService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<AiSuggestionService> _logger;
+    private readonly string _model;
 
     public AiSuggestionService(HttpClient httpClient, IConfiguration configuration, ILogger<AiSuggestionService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
+        _model = configuration["Groq:Model"] ?? "openai/gpt-oss-120b";
         var apiKey = configuration["Groq:ApiKey"] ?? throw new InvalidOperationException("Groq API key not configured");
         _httpClient.BaseAddress = new Uri("https://api.groq.com/openai/v1/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -70,7 +72,8 @@ DESCRIÇÃO DA VAGA:
 
         var requestBody = new
         {
-            model = "llama-3.3-70b-versatile",
+            model = _model,
+            reasoning_effort = "low",
             messages = messages.ToArray()
         };
 
@@ -80,7 +83,12 @@ DESCRIÇÃO DA VAGA:
         try
         {
             var response = await _httpClient.PostAsync("chat/completions", content);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException(
+                    $"Groq returned {(int)response.StatusCode} ({response.StatusCode}): {errorBody}");
+            }
 
             var responseJson = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(responseJson);

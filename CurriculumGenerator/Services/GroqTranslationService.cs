@@ -9,11 +9,13 @@ public class GroqTranslationService
 {
     private readonly HttpClient _httpClient;
     private readonly ILogger<GroqTranslationService> _logger;
+    private readonly string _model;
 
     public GroqTranslationService(HttpClient httpClient, IConfiguration configuration, ILogger<GroqTranslationService> logger)
     {
         _httpClient = httpClient;
         _logger = logger;
+        _model = configuration["Groq:Model"] ?? "openai/gpt-oss-120b";
         var apiKey = configuration["Groq:ApiKey"] ?? throw new InvalidOperationException("Groq API key not configured");
         _httpClient.BaseAddress = new Uri("https://api.groq.com/openai/v1/");
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -93,9 +95,10 @@ FINAL REMINDER: You MUST translate every string value to {targetLanguageName}. N
 
         var requestBody = new
         {
-            model = "llama-3.3-70b-versatile",
+            model = _model,
             temperature = 0.1,
-            max_tokens = 8192,
+            max_tokens = 16384,
+            reasoning_effort = "low",
             messages = new object[]
             {
                 new { role = "system", content = systemPrompt },
@@ -109,7 +112,12 @@ FINAL REMINDER: You MUST translate every string value to {targetLanguageName}. N
         try
         {
             var response = await _httpClient.PostAsync("chat/completions", httpContent);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException(
+                    $"Groq returned {(int)response.StatusCode} ({response.StatusCode}): {errorBody}");
+            }
 
             var responseJson = await response.Content.ReadAsStringAsync();
             using var doc = JsonDocument.Parse(responseJson);
