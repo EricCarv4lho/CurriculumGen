@@ -51,12 +51,23 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontEnd", policy =>
     {
-        var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
-                      ?? Array.Empty<string>();
-        if (origins.Length > 0)
-            policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+        if (builder.Environment.IsDevelopment())
+        {
+            // Any localhost port, so the Vite dev server works whichever port it picks.
+            policy.SetIsOriginAllowed(o =>
+                      o.StartsWith("http://localhost") || o.StartsWith("http://127.0.0.1"))
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
         else
-            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        {
+            var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+                          ?? Array.Empty<string>();
+            if (origins.Length > 0)
+                policy.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod();
+            else
+                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        }
     });
 });
 
@@ -115,7 +126,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowFrontEnd");
-app.UseHttpsRedirection();
+// No HTTPS redirect in Development: the Vite proxy talks plain HTTP and a 307
+// to the https port breaks CORS preflight requests.
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
