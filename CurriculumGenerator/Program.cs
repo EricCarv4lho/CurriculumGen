@@ -119,4 +119,16 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Serve the built SPA (FrontEnd/dist) so `dotnet run` alone delivers the full app.
+var frontendDist = Path.Combine(builder.Environment.ContentRootPath, "..", "FrontEnd", "dist");
+if (Directory.Exists(frontendDist))
+{
+    var fileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.GetFullPath(frontendDist));
+    app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = fileProvider });
+    app.UseStaticFiles(new StaticFileOptions { FileProvider = fileProvider });
+    app.MapFallbackToFile("index.html", new StaticFileOptions { FileProvider = fileProvider });
+}
+
 app.Run();
