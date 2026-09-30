@@ -79,11 +79,8 @@ export function validateStep(step: number): boolean {
   }
 
   if (step === 3) {
+    // Experiências são opcionais: valida apenas os itens que existirem.
     const exps: any[] = (window as any).__experiences ?? [];
-    if (exps.length === 0) {
-      addErr('Adicione pelo menos uma experiência profissional.');
-      valid = false;
-    }
     exps.forEach((exp: any, i: number) => {
       const el = document.getElementById(`exp-${exp.id}`);
       if (!el) return;
