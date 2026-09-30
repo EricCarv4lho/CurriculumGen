@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CurriculumGenerator</title>
+  <meta name="description" content="Gere seu currículo profissional em PDF" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <svg class="logo-svg" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect class="logo-doc" x="4" y="2" width="24" height="28" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+          <path class="logo-fold" d="M24 21v5h-5" stroke="var(--border)" stroke-width="1.5" stroke-linejoin="round"/>
+          <path class="logo-bolt" d="M17 10l-6 9h4.5L13 24l9-11h-4.5L18 10z" fill="var(--primary)" stroke="var(--primary)" stroke-width=".8" stroke-linejoin="round"/>
+          <path class="logo-bolt-accent" d="M16.5 11l-5 7.5h3.5L12.5 22l7-9H16l1-2z" fill="var(--accent)" opacity=".9"/>
+        </svg>
+        <span class="logo-text">Curriculum<span class="logo-text-highlight">Gen</span></span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-primary btn-entrar" id="authBtn">Entrar</button>
+        <div class="settings-wrap">
+          <button class="settings-btn" id="settingsBtn" title="Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="settings-dropdown" id="settingsDropdown" hidden>
+            <div class="settings-dropdown-body" id="settingsDropdownBody">
+              <button class="settings-theme-btn" id="settingsThemeToggle">
+                <svg class="st-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                  <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                  <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="st-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                </svg>
+                <span id="settingsThemeLabel">Tema escuro</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="tabs">
+      <button class="tab-btn active" id="btn-createForm">Criar</button>
+      <button class="tab-btn" id="btn-translate">Traduzir</button>
+      <button class="tab-btn" id="btn-cover">Carta</button>
+      <button class="tab-btn" id="btn-resumes">Meus Currículos</button>
+    </div>
+
+    <section id="sectionCreateForm">
+      <div class="steps-nav" aria-label="Progresso">
+        <div class="steps-list">
+          <button class="step-btn active" data-step="1">Pessoal</button>
+          <button class="step-btn" data-step="2">Objetivo</button>
+          <button class="step-btn" data-step="3">Experiência</button>
+          <button class="step-btn" data-step="4">Formação</button>
+          <button class="step-btn" data-step="5">Habilidades</button>
+          <button class="step-btn" data-step="6">Idiomas</button>
+          <button class="step-btn" data-step="7">Modelo</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <form id="curriculumForm" novalidate>
+          <section class="step-section active" id="step1">
+            <div class="step-header">
+              <h2 class="step-title">Informações Pessoais</h2>
+              <p class="step-desc">Seus dados de contato</p>
+            </div>
+            <div class="form-grid">
+              <div class="field col-2">
+                <label for="fullName">Nome Completo <span class="required">*</span></label>
+                <input type="text" id="fullName" placeholder="Ex: João da Silva" autocomplete="name" required />
+                <span class="field-error" id="errFullName"></span>
+              </div>
+              <div class="field col-2">
+                <label for="professionalTitle">Título Profissional <span class="required">*</span></label>
+                <input type="text" id="professionalTitle" placeholder="Ex: Desenvolvedor Full Stack" required />
+                <span class="field-error" id="errProfessionalTitle"></span>
+              </div>
+              <div class="field">
+                <label for="city">Cidade <span class="required">*</span></label>
+                <input type="text" id="city" placeholder="Ex: São Paulo" required />
+                <span class="field-error" id="errCity"></span>
+              </div>
+              <div class="field">
+                <label for="state">Estado <span class="required">*</span></label>
+                <input type="text" id="state" placeholder="Ex: SP" maxlength="2" required />
+                <span class="field-error" id="errState"></span>
+              </div>
+              <div class="field">
+                <label for="phoneNumber">Telefone <span class="required">*</span></label>
+                <input type="tel" id="phoneNumber" placeholder="(11) 99999-9999" autocomplete="tel" required />
+                <span class="field-error" id="errPhoneNumber"></span>
+              </div>
+              <div class="field">
+                <label for="email">E-mail <span class="required">*</span></label>
+                <input type="email" id="email" placeholder="nome@email.com" autocomplete="email" required />
+                <span class="field-error" id="errEmail"></span>
+              </div>
+              <div class="field">
+                <label for="linkedinLink">LinkedIn</label>
+                <div class="input-prefix">
+                  <svg class="prefix-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  <input type="url" id="linkedinLink" placeholder="linkedin.com/in/seuperfil" />
+                </div>
+              </div>
+              <div class="field">
+                <label for="gitHubLink">GitHub</label>
+                <div class="input-prefix">
+                  <svg class="prefix-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  <input type="url" id="gitHubLink" placeholder="github.com/seuusuario" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="step-section" id="step2">
+            <div class="step-header">
+              <h2 class="step-title">Objetivo & Destaques</h2>
+              <p class="step-desc">Conte o que você busca</p>
+            </div>
+            <div class="form-grid">
+              <div class="field col-2">
+                <label for="careerObjective">Objetivo Profissional <span class="required">*</span></label>
+                <div class="field-row">
+                  <textarea id="careerObjective" rows="4" placeholder="Descreva seu objetivo de carreira..." required></textarea>
+                  <button type="button" class="btn btn-sm ai-btn" id="improveObjective" title="Melhorar com IA">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  </button>
+                </div>
+                <span class="field-error" id="errCareerObjective"></span>
+                <span class="char-count" id="countCareerObjective">0 / 500</span>
+              </div>
+              <div class="field col-2">
+                <label for="highlights">Destaques <span class="required">*</span></label>
+                <textarea id="highlights" rows="4" placeholder="Suas principais conquistas..." required></textarea>
+                <span class="field-error" id="errHighlights"></span>
+                <span class="char-count" id="countHighlights">0 / 500</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="step-section" id="step3">
+            <div class="step-header">
+              <h2 class="step-title">Experiência Profissional</h2>
+              <p class="step-desc">Adicione suas experiências</p>
+            </div>
+            <div id="experienceList" class="dynamic-list"></div>
+            <button type="button" class="add-btn" id="addExperienceBtn">
+              <span class="add-icon">+</span> Adicionar Experiência
+            </button>
+          </section>
+
+          <section class="step-section" id="step4">
+            <div class="step-header">
+              <h2 class="step-title">Formação Acadêmica</h2>
+              <p class="step-desc">Adicione sua formação</p>
+            </div>
+            <div id="educationList" class="dynamic-list"></div>
+            <button type="button" class="add-btn" id="addEducationBtn">
+              <span class="add-icon">+</span> Adicionar Formação
+            </button>
+          </section>
+
+          <section class="step-section" id="step5">
+            <div class="step-header">
+              <h2 class="step-title">Habilidades</h2>
+              <p class="step-desc">Adicione suas habilidades</p>
+            </div>
+            <div class="skills-input-row">
+              <div class="field" style="flex:1">
+                <label for="skillInput">Nova Habilidade</label>
+                <div class="input-prefix">
+                  <svg class="prefix-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  </svg>
+                  <input type="text" id="skillInput" placeholder="Ex: React, Python..." />
+                </div>
+              </div>
+              <button type="button" class="add-btn inline-add" id="addSkillBtn">+ Adicionar</button>
+            </div>
+            <div class="tags-container" id="skillsContainer">
+              <span class="tags-empty">Nenhuma habilidade adicionada.</span>
+            </div>
+            <div class="suggestions">
+              <span class="suggestions-label">Sugestões:</span>
+              <div class="suggestion-chips" id="suggestionsChips"></div>
+            </div>
+          </section>
+
+          <section class="step-section" id="step6">
+            <div class="step-header">
+              <h2 class="step-title">Idiomas</h2>
+              <p class="step-desc">Idiomas que você fala</p>
+            </div>
+            <div id="languageList" class="dynamic-list"></div>
+            <button type="button" class="add-btn" id="addLanguageBtn">
+              <span class="add-icon">+</span> Adicionar Idioma
+            </button>
+          </section>
+
+          <section class="step-section" id="step7">
+            <div class="step-header">
+              <h2 class="step-title">Modelo do Currículo</h2>
+              <p class="step-desc">Escolha o modelo e revise antes de gerar</p>
+            </div>
+            <div class="template-selector">
+              <label>Template do PDF</label>
+              <div class="template-options" id="templateOptions">
+                <div class="template-card selected" data-template="classic">
+                  <div class="template-preview">
+                    <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
+                      <rect x="12" y="12" width="70" height="5" rx="2" fill="#000000"/>
+                      <rect x="12" y="19" width="90" height="3" rx="1.5" fill="#555555"/>
+                      <rect x="12" y="30" width="60" height="3" rx="1.5" fill="#000000"/>
+                      <rect x="12" y="36" width="156" height="1" fill="#e3e5e8"/>
+                      <rect x="12" y="42" width="140" height="3" rx="1.5" fill="#666666"/>
+                      <rect x="12" y="48" width="120" height="3" rx="1.5" fill="#666666"/>
+                      <rect x="12" y="60" width="60" height="3" rx="1.5" fill="#000000"/>
+                      <rect x="12" y="66" width="156" height="1" fill="#e3e5e8"/>
+                      <rect x="12" y="72" width="130" height="3" rx="1.5" fill="#666666"/>
+                      <rect x="12" y="78" width="110" height="3" rx="1.5" fill="#666666"/>
+                      <rect x="12" y="90" width="60" height="3" rx="1.5" fill="#000000"/>
+                      <rect x="12" y="96" width="156" height="1" fill="#e3e5e8"/>
+                      <rect x="12" y="102" width="100" height="3" rx="1.5" fill="#666666"/>
+                      <rect x="12" y="108" width="80" height="3" rx="1.5" fill="#666666"/>
+                      <rect x="12" y="120" width="60" height="3" rx="1.5" fill="#000000"/>
+                      <rect x="12" y="126" width="156" height="1" fill="#e3e5e8"/>
+                    </svg>
+                  </div>
+                  <div class="template-card-info">
+                    <div class="template-accent classic-accent"></div>
+                    <div class="template-info">
+                      <div class="template-name">Clássico</div>
+                      <div class="template-desc">Preto e branco, ideal para ATS/Gupy</div>
+                    </div>
+                    <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                </div>
+                <div class="template-card" data-template="modern">
+                  <div class="template-preview">
+                    <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
+                      <rect x="1" y="1" width="42" height="128" rx="4" fill="#117a65"/>
+                      <rect x="12" y="12" width="20" height="3" rx="1.5" fill="rgba(255,255,255,0.7)"/>
+                      <rect x="12" y="22" width="16" height="3" rx="1.5" fill="rgba(255,255,255,0.5)"/>
+                      <rect x="52" y="12" width="50" height="4" rx="2" fill="#117a65"/>
+                      <rect x="52" y="18" width="80" height="3" rx="1.5" fill="#7a7f89"/>
+                      <rect x="52" y="28" width="55" height="3" rx="1.5" fill="#117a65"/>
+                      <rect x="52" y="34" width="118" height="1" fill="#e3e5e8"/>
+                      <rect x="52" y="40" width="110" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="52" y="46" width="95" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="52" y="58" width="55" height="3" rx="1.5" fill="#117a65"/>
+                      <rect x="52" y="64" width="118" height="1" fill="#e3e5e8"/>
+                      <rect x="52" y="70" width="105" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="52" y="76" width="90" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="52" y="88" width="55" height="3" rx="1.5" fill="#8b5cf6"/>
+                      <rect x="52" y="94" width="118" height="1" fill="#e3e5e8"/>
+                      <rect x="52" y="100" width="100" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="52" y="106" width="85" height="3" rx="1.5" fill="#b0b3ba"/>
+                    </svg>
+                  </div>
+                  <div class="template-card-info">
+                    <div class="template-accent modern-accent"></div>
+                    <div class="template-info">
+                      <div class="template-name">Moderno</div>
+                      <div class="template-desc">Design contemporâneo com cores</div>
+                    </div>
+                    <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                </div>
+                <div class="template-card" data-template="executive">
+                  <div class="template-preview">
+                    <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
+                      <rect x="1" y="1" width="178" height="32" rx="4" fill="#192337"/>
+                      <rect x="12" y="10" width="80" height="5" rx="2" fill="rgba(255,255,255,0.95)"/>
+                      <rect x="12" y="17" width="100" height="3" rx="1.5" fill="rgba(255,255,255,0.5)"/>
+                      <rect x="12" y="22" width="60" height="3" rx="1.5" fill="rgba(255,255,255,0.35)"/>
+                      <rect x="12" y="40" width="156" height="2" rx="1" fill="#192337"/>
+                      <rect x="12" y="47" width="60" height="3" rx="1.5" fill="#192337"/>
+                      <rect x="12" y="53" width="140" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="59" width="120" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="72" width="60" height="3" rx="1.5" fill="#192337"/>
+                      <rect x="12" y="78" width="156" height="1" fill="#e3e5e8"/>
+                      <rect x="12" y="84" width="130" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="90" width="110" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="103" width="60" height="3" rx="1.5" fill="#192337"/>
+                      <rect x="12" y="109" width="156" height="1" fill="#e3e5e8"/>
+                      <rect x="12" y="115" width="100" height="3" rx="1.5" fill="#b0b3ba"/>
+                    </svg>
+                  </div>
+                  <div class="template-card-info">
+                    <div class="template-accent executive-accent"></div>
+                    <div class="template-info">
+                      <div class="template-name">Executivo</div>
+                      <div class="template-desc">Sóbrio e elegante para cargos seniores</div>
+                    </div>
+                    <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                </div>
+                <div class="template-card" data-template="creative">
+                  <div class="template-preview">
+                    <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
+                      <rect x="1" y="1" width="178" height="26" rx="3" fill="#8e44ad"/>
+                      <rect x="12" y="9" width="90" height="5" rx="2" fill="rgba(255,255,255,0.95)"/>
+                      <rect x="12" y="16" width="60" height="3" rx="1.5" fill="rgba(255,255,255,0.5)"/>
+                      <rect x="12" y="35" width="60" height="3" rx="1.5" fill="#8e44ad"/>
+                      <rect x="12" y="41" width="156" height="3" rx="1.5" fill="#e74c3c"/>
+                      <rect x="12" y="49" width="130" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="55" width="110" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="68" width="60" height="3" rx="1.5" fill="#8e44ad"/>
+                      <rect x="12" y="74" width="156" height="3" rx="1.5" fill="#e74c3c"/>
+                      <rect x="12" y="82" width="120" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="88" width="100" height="3" rx="1.5" fill="#b0b3ba"/>
+                      <rect x="12" y="101" width="60" height="3" rx="1.5" fill="#8e44ad"/>
+                      <rect x="12" y="107" width="156" height="3" rx="1.5" fill="#e74c3c"/>
+                      <rect x="12" y="115" width="90" height="3" rx="1.5" fill="#b0b3ba"/>
+                    </svg>
+                  </div>
+                  <div class="template-card-info">
+                    <div class="template-accent creative-accent"></div>
+                    <div class="template-info">
+                      <div class="template-name">Criativo</div>
+                      <div class="template-desc">Visual ousado para áreas inovadoras</div>
+                    </div>
+                    <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                </div>
+              </div>
+              <select id="templateSelect" hidden>
+                <option value="classic">Clássico</option>
+                <option value="modern">Moderno</option>
+                <option value="executive">Executivo</option>
+                <option value="creative">Criativo</option>
+              </select>
+            </div>
+          </section>
+
+          <div class="form-nav">
+            <button type="button" class="btn" id="prevBtn" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Anterior</button>
+            <div class="nav-spacer"></div>
+            <button type="button" class="btn btn-primary" id="nextBtn">Próximo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
+            <button type="submit" class="btn btn-generate" id="submitBtn" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Gerar PDF</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="sectionTranslateForm" hidden>
+      <div class="card translate-card">
+        <div class="translate-header">
+          <div>
+            <h2 class="step-title">Traduzir Currículo</h2>
+            <p class="step-desc">Arraste ou selecione um arquivo</p>
+          </div>
+        </div>
+        <div class="dropzone_area" id="dropzoneArea">
+          <div class="dropzone-content">
+            <div class="dropzone-icon-wrap">
+              <svg class="dropzone-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/>
+                <path d="M14 2v6h6M16 13H8M12 9v8"/>
+              </svg>
+            </div>
+            <p class="dropzone-text">Arraste o arquivo aqui</p>
+            <p class="dropzone-sub">ou <span class="dropzone-browse">clique para selecionar</span></p>
+            <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.jpg,.png" hidden />
+            <p class="dropzone-formats">PDF, DOC, DOCX, JPG, PNG (máx. 10MB)</p>
+          </div>
+          <div class="file-preview" id="filePreview" hidden>
+            <div class="file-info">
+              <span class="file-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></span>
+              <div>
+                <p class="file-name" id="fileName"></p>
+                <p class="file-size" id="fileSize"></p>
+              </div>
+            </div>
+            <button type="button" class="remove-file" id="removeFile"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+        </div>
+        <div class="translate-options">
+          <div class="field">
+            <label for="targetLanguage">Idioma de Destino</label>
+            <select id="targetLanguage">
+              <option value="" disabled selected>Selecione</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="it">Italiano</option>
+              <option value="pt">Português</option>
+            </select>
+          </div>
+        </div>
+          <div class="style-options">
+
+        </div>
+        <button type="button" class="btn btn-translate" id="translateBtn" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          Traduzir
+        </button>
+      </div>
+    </section>
+
+    <section id="sectionCover" hidden>
+      <div class="card">
+        <div class="step-header">
+          <h2 class="step-title">Carta de Apresentação</h2>
+          <p class="step-desc">Gere uma carta personalizada com IA para a vaga desejada</p>
+        </div>
+        <div class="form-grid">
+          <div class="field col-2">
+            <label for="coverJobDesc">Descrição da Vaga</label>
+            <textarea id="coverJobDesc" rows="6" placeholder="Cole a descrição da vaga aqui..."></textarea>
+          </div>
+          <div class="field col-2">
+            <label for="coverExtra">Observações (opcional)</label>
+            <textarea id="coverExtra" rows="3" placeholder="Algo mais que devo destacar?"></textarea>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary" id="coverGenerateBtn" style="width:100%;justify-content:center;margin-top:1rem">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Gerar Carta
+        </button>
+
+        <div class="cover-result" id="coverResult" hidden>
+          <div class="cover-result-header">
+            <h3 class="cover-result-title">Sua Carta de Apresentação</h3>
+            <div class="cover-result-actions">
+              <button type="button" class="btn btn-sm btn-ghost" id="coverCopyBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Copiar
+              </button>
+              <button type="button" class="btn btn-sm" id="coverRegenBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                Gerar Outra
+              </button>
+            </div>
+          </div>
+          <div class="cover-letter-body" id="coverLetterBody"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="sectionResumes" hidden>
+      <div class="card">
+        <div class="step-header">
+          <h2 class="step-title">Meus Currículos</h2>
+          <p class="step-desc">Gerencie seus currículos salvos</p>
+        </div>
+        <div id="resumesList" class="resumes-list">
+          <p class="tags-empty">Nenhum currículo salvo ainda.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="loading-overlay" id="resumeLoadingOverlay">
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p class="loading-text">Gerando PDF...</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="authModalTitle">Entrar</h2>
+      </div>
+      <form id="authForm" class="modal-body">
+        <div class="field" id="authNameField" hidden>
+          <label for="authName">Nome</label>
+          <input type="text" id="authName" placeholder="Seu nome" required />
+        </div>
+        <div class="field">
+          <label for="authEmail">E-mail</label>
+          <input type="email" id="authEmail" placeholder="seu@email.com" required />
+        </div>
+        <div class="field">
+          <label for="authPassword">Senha</label>
+          <input type="password" id="authPassword" placeholder="Mínimo 6 caracteres" required />
+        </div>
+        <span class="field-error" id="authError"></span>
+        <div class="modal-actions">
+          <button type="submit" class="btn btn-primary" id="authSubmit" style="width:100%;justify-content:center">Entrar</button>
+        </div>
+      </form>
+      <div class="modal-footer">
+        <p id="authToggleText">Não tem conta? <a href="#" id="authToggle">Cadastre-se</a></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p class="loading-text">Processando...</p>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <footer class="footer">
+    CurriculumGenerator
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

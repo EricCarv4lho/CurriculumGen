@@ -1,0 +1,42 @@
+export const $ = {
+  form: document.getElementById('curriculumForm') as HTMLFormElement | null,
+  submitBtn: document.getElementById('submitBtn') as HTMLButtonElement | null,
+  loadingOverlay: document.getElementById('loadingOverlay') as HTMLElement | null,
+
+  dropzoneArea: document.getElementById('dropzoneArea') as HTMLElement | null,
+  fileInput: document.getElementById('fileInput') as HTMLInputElement | null,
+  filePreview: document.getElementById('filePreview') as HTMLElement | null,
+  fileName: document.getElementById('fileName') as HTMLElement | null,
+  fileSize: document.getElementById('fileSize') as HTMLElement | null,
+  removeFile: document.getElementById('removeFile') as HTMLElement | null,
+  targetLanguage: document.getElementById('targetLanguage') as HTMLSelectElement | null,
+  translateBtn: document.getElementById('translateBtn') as HTMLButtonElement | null,
+
+  authModal: document.getElementById('authModal') as HTMLElement | null,
+  authBtn: document.getElementById('authBtn') as HTMLButtonElement | null,
+  authForm: document.getElementById('authForm') as HTMLFormElement | null,
+  authEmail: document.getElementById('authEmail') as HTMLInputElement | null,
+  authPassword: document.getElementById('authPassword') as HTMLInputElement | null,
+  authName: document.getElementById('authName') as HTMLInputElement | null,
+  authError: document.getElementById('authError') as HTMLElement | null,
+  authSubmit: document.getElementById('authSubmit') as HTMLButtonElement | null,
+  authModalTitle: document.getElementById('authModalTitle') as HTMLElement | null,
+  authToggleText: document.getElementById('authToggleText') as HTMLElement | null,
+  authNameField: document.getElementById('authNameField') as HTMLElement | null,
+
+  settingsBtn: document.getElementById('settingsBtn') as HTMLButtonElement | null,
+  settingsDropdown: document.getElementById('settingsDropdown') as HTMLElement | null,
+  settingsDropdownBody: document.getElementById('settingsDropdownBody') as HTMLElement | null,
+  settingsThemeToggle: document.getElementById('settingsThemeToggle') as HTMLButtonElement | null,
+
+  nextBtn: document.getElementById('nextBtn') as HTMLButtonElement | null,
+  prevBtn: document.getElementById('prevBtn') as HTMLButtonElement | null,
+
+  coverGenerateBtn: document.getElementById('coverGenerateBtn') as HTMLButtonElement | null,
+  coverJobDesc: document.getElementById('coverJobDesc') as HTMLTextAreaElement | null,
+  coverExtra: document.getElementById('coverExtra') as HTMLTextAreaElement | null,
+  coverResult: document.getElementById('coverResult') as HTMLElement | null,
+  coverLetterBody: document.getElementById('coverLetterBody') as HTMLElement | null,
+  coverCopyBtn: document.getElementById('coverCopyBtn') as HTMLButtonElement | null,
+  coverRegenBtn: document.getElementById('coverRegenBtn') as HTMLButtonElement | null,
+};

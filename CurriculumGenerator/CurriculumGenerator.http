@@ -1,0 +1,6 @@
+@CurriculumGenerator_HostAddress = http://localhost:5277
+
+GET {{CurriculumGenerator_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

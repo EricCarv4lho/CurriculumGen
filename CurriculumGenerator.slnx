@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CurriculumGenerator.Tests/CurriculumGenerator.Tests.csproj" />
+  <Project Path="CurriculumGenerator/CurriculumGenerator.csproj" />
+</Solution>
