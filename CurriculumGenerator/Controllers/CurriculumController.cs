@@ -72,7 +72,6 @@ namespace CurriculumGenerator.Controllers
         }
 
         [HttpPost("translate")]
-        [Authorize]
         [RequestSizeLimit(MaxPdfSizeBytes)]
         public async Task<IActionResult> TranslateCurriculum(
             IFormFile file,
@@ -92,7 +91,13 @@ namespace CurriculumGenerator.Controllers
 
             try
             {
-                await _usageGuard.EnforceLimitAsync(UserId, Plan, UsageAction.Translation);
+                // Translation is open to anonymous visitors (login is only for the
+                // saved-resumes history); the usage quota is tracked per account,
+                // so skip it when signed out.
+                if (User.Identity?.IsAuthenticated == true)
+                {
+                    await _usageGuard.EnforceLimitAsync(UserId, Plan, UsageAction.Translation);
+                }
 
                 var text = _pdfExtraction.ExtractTextFromPdf(file.OpenReadStream());
                 var curriculum = await _translationService.ExtractAndTranslateAsync(text, targetLanguage);
@@ -100,7 +105,10 @@ namespace CurriculumGenerator.Controllers
                 var template = curriculum.Template ?? "classic";
                 var pdfBytes = _curriculumService.GenerateCurriculum(curriculum, template, targetLanguage);
 
-                await _usageGuard.RecordUsageAsync(UserId, UsageAction.Translation);
+                if (User.Identity?.IsAuthenticated == true)
+                {
+                    await _usageGuard.RecordUsageAsync(UserId, UsageAction.Translation);
+                }
                 return File(pdfBytes, "application/pdf", $"translated_curriculum_{targetLanguage}.pdf");
             }
             catch (UsageLimitException ex)
