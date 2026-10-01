@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CurriculumGenerator</title>
   <meta name="description" content="Gere seu currículo profissional em PDF" />
+  <meta name="theme-color" content="#fcfcfb" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#191919" media="(prefers-color-scheme: dark)" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="CurriculumGen" />
+  <meta property="og:description" content="Gere seu currículo profissional em PDF, traduza para outros idiomas e crie cartas de apresentação com IA." />
+  <meta property="og:url" content="https://thecurriculumgen.vercel.app" />
+  <meta property="og:locale" content="pt_BR" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -23,7 +31,7 @@
         <span class="logo-text">Curriculum<span class="logo-text-highlight">Gen</span></span>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary btn-entrar" id="authBtn">Entrar</button>
+        <button class="btn btn-primary btn-entrar" id="authBtn" hidden>Entrar</button>
         <div class="settings-wrap">
           <button class="settings-btn" id="settingsBtn" title="Menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -54,11 +62,11 @@
   </header>
 
   <main class="main">
-    <div class="tabs">
-      <button class="tab-btn active" id="btn-createForm">Criar</button>
-      <button class="tab-btn" id="btn-translate">Traduzir</button>
-      <button class="tab-btn" id="btn-cover">Carta</button>
-      <button class="tab-btn" id="btn-resumes">Meus Currículos</button>
+    <div class="tabs" role="tablist" aria-label="Seções do aplicativo">
+      <button class="tab-btn active" id="btn-createForm" role="tab" aria-selected="true">Criar</button>
+      <button class="tab-btn" id="btn-translate" role="tab" aria-selected="false">Traduzir</button>
+      <button class="tab-btn" id="btn-cover" role="tab" aria-selected="false">Carta</button>
+      <button class="tab-btn" id="btn-resumes" role="tab" aria-selected="false">Meus Currículos</button>
     </div>
 
     <section id="sectionCreateForm">
@@ -142,7 +150,7 @@
               <div class="field col-2">
                 <label for="careerObjective">Objetivo Profissional <span class="required">*</span></label>
                 <div class="field-row">
-                  <textarea id="careerObjective" rows="4" placeholder="Descreva seu objetivo de carreira..." required></textarea>
+                  <textarea id="careerObjective" rows="4" maxlength="500" placeholder="Descreva seu objetivo de carreira..." required></textarea>
                   <button type="button" class="btn btn-sm ai-btn" id="improveObjective" title="Melhorar com IA">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   </button>
@@ -152,7 +160,7 @@
               </div>
               <div class="field col-2">
                 <label for="highlights">Destaques <span class="required">*</span></label>
-                <textarea id="highlights" rows="4" placeholder="Suas principais conquistas..." required></textarea>
+                <textarea id="highlights" rows="4" maxlength="500" placeholder="Suas principais conquistas..." required></textarea>
                 <span class="field-error" id="errHighlights"></span>
                 <span class="char-count" id="countHighlights">0 / 500</span>
               </div>
@@ -187,7 +195,7 @@
               <p class="step-desc">Adicione suas habilidades</p>
             </div>
             <div class="skills-input-row">
-              <div class="field" style="flex:1">
+              <div class="field">
                 <label for="skillInput">Nova Habilidade</label>
                 <div class="input-prefix">
                   <svg class="prefix-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -199,7 +207,7 @@
               <button type="button" class="add-btn inline-add" id="addSkillBtn">+ Adicionar</button>
             </div>
             <div class="tags-container" id="skillsContainer">
-              <span class="tags-empty">Nenhuma habilidade adicionada.</span>
+              <span class="tags-empty">Nenhuma habilidade adicionada ainda.</span>
             </div>
             <div class="suggestions">
               <span class="suggestions-label">Sugestões:</span>
@@ -226,7 +234,7 @@
             <div class="template-selector">
               <label>Template do PDF</label>
               <div class="template-options" id="templateOptions">
-                <div class="template-card selected" data-template="classic">
+                <div class="template-card selected" data-template="classic" role="button" tabindex="0" aria-pressed="true">
                   <div class="template-preview">
                     <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
@@ -257,7 +265,7 @@
                     <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
                 </div>
-                <div class="template-card" data-template="modern">
+                <div class="template-card" data-template="modern" role="button" tabindex="0" aria-pressed="false">
                   <div class="template-preview">
                     <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
@@ -289,7 +297,7 @@
                     <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
                 </div>
-                <div class="template-card" data-template="executive">
+                <div class="template-card" data-template="executive" role="button" tabindex="0" aria-pressed="false">
                   <div class="template-preview">
                     <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
@@ -319,7 +327,7 @@
                     <svg class="template-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
                 </div>
-                <div class="template-card" data-template="creative">
+                <div class="template-card" data-template="creative" role="button" tabindex="0" aria-pressed="false">
                   <div class="template-preview">
                     <svg viewBox="0 0 180 130" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <rect x="1" y="1" width="178" height="128" rx="4" fill="white" stroke="#d0d2d6" stroke-width="1.5"/>
@@ -359,10 +367,10 @@
           </section>
 
           <div class="form-nav">
-            <button type="button" class="btn" id="prevBtn" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Anterior</button>
+            <button type="button" class="btn" id="prevBtn" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Anterior</button>
             <div class="nav-spacer"></div>
             <button type="button" class="btn btn-primary" id="nextBtn">Próximo <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>
-            <button type="submit" class="btn btn-generate" id="submitBtn" style="display:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Gerar PDF</button>
+            <button type="submit" class="btn btn-generate" id="submitBtn" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Gerar PDF</button>
           </div>
         </form>
       </div>
@@ -376,7 +384,7 @@
             <p class="step-desc">Arraste ou selecione um arquivo</p>
           </div>
         </div>
-        <div class="dropzone_area" id="dropzoneArea">
+        <div class="dropzone_area" id="dropzoneArea" role="button" tabindex="0" aria-label="Selecionar arquivo do currículo">
           <div class="dropzone-content">
             <div class="dropzone-icon-wrap">
               <svg class="dropzone-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -440,7 +448,7 @@
             <textarea id="coverExtra" rows="3" placeholder="Algo mais que devo destacar?"></textarea>
           </div>
         </div>
-        <button type="button" class="btn btn-primary" id="coverGenerateBtn" style="width:100%;justify-content:center;margin-top:1rem">
+        <button type="button" class="btn btn-primary btn-block cover-generate" id="coverGenerateBtn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           Gerar Carta
         </button>
@@ -484,7 +492,7 @@
     </div>
   </main>
 
-  <div class="modal-overlay" id="authModal">
+  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
     <div class="modal-box">
       <div class="modal-header">
         <h2 class="modal-title" id="authModalTitle">Entrar</h2>
@@ -504,7 +512,7 @@
         </div>
         <span class="field-error" id="authError"></span>
         <div class="modal-actions">
-          <button type="submit" class="btn btn-primary" id="authSubmit" style="width:100%;justify-content:center">Entrar</button>
+          <button type="submit" class="btn btn-primary btn-block" id="authSubmit">Entrar</button>
         </div>
       </form>
       <div class="modal-footer">
@@ -517,6 +525,19 @@
     <div class="loading-box">
       <div class="spinner"></div>
       <p class="loading-text">Processando...</p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title" id="confirmModalTitle">Confirmar ação</h2>
+      </div>
+      <p class="confirm-message" id="confirmMessage"></p>
+      <div class="modal-actions confirm-actions">
+        <button type="button" class="btn btn-ghost" id="confirmCancel">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmOk">Excluir</button>
+      </div>
     </div>
   </div>
 

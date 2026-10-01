@@ -33,24 +33,24 @@ function renderExperienceItem(item: ExperienceItem): void {
   div.id = `exp-${item.id}`;
   div.innerHTML = `
     <div class="dynamic-item-header">
-      <span class="dynamic-item-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Experiência #${experiences.indexOf(item) + 1}</span>
-      <button type="button" class="remove-btn" onclick="removeExperience(${item.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remover</button>
+      <span class="dynamic-item-title"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg> Experiência #${experiences.indexOf(item) + 1}</span>
+      <button type="button" class="remove-btn" onclick="removeExperience(${item.id})"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remover</button>
     </div>
     <div class="form-grid">
       <div class="field">
-        <label>Empresa</label>
-        <input type="text" placeholder="Ex: Google" onchange="updateExp(${item.id},'companyName',this.value)" />
+        <label for="expCompany-${item.id}">Empresa</label>
+        <input type="text" id="expCompany-${item.id}" placeholder="Ex: Google" onchange="updateExp(${item.id},'companyName',this.value)" />
       </div>
       <div class="field">
-        <label>Cargo</label>
-        <input type="text" placeholder="Ex: Desenvolvedor Sênior" onchange="updateExp(${item.id},'jobTitle',this.value)" />
+        <label for="expRole-${item.id}">Cargo</label>
+        <input type="text" id="expRole-${item.id}" placeholder="Ex: Desenvolvedor Sênior" onchange="updateExp(${item.id},'jobTitle',this.value)" />
       </div>
       <div class="field">
-        <label>Data de Início</label>
-        <input type="month" onchange="updateExp(${item.id},'startDate',this.value)" />
+        <label for="expStart-${item.id}">Data de Início</label>
+        <input type="month" id="expStart-${item.id}" onchange="updateExp(${item.id},'startDate',this.value)" />
       </div>
       <div class="field" id="endDateField-${item.id}">
-        <label>Data de Fim</label>
+        <label for="endDate-${item.id}">Data de Fim</label>
         <input type="month" id="endDate-${item.id}" onchange="updateExp(${item.id},'endDate',this.value)" />
         <div class="checkbox-row">
           <input type="checkbox" id="current-${item.id}" onchange="toggleCurrentJob(${item.id}, this.checked)" />
@@ -58,16 +58,16 @@ function renderExperienceItem(item: ExperienceItem): void {
         </div>
       </div>
       <div class="field col-2">
-        <label>Descrição das Atividades</label>
-        <textarea rows="3" placeholder="Descreva suas responsabilidades e conquistas..." onchange="updateExp(${item.id},'description',this.value)"></textarea>
+        <label for="expDesc-${item.id}">Descrição das Atividades</label>
+        <textarea rows="3" id="expDesc-${item.id}" placeholder="Descreva suas responsabilidades e conquistas..." onchange="updateExp(${item.id},'description',this.value)"></textarea>
       </div>
     </div>
   `;
   document.getElementById('experienceList')?.appendChild(div);
 }
 
-function showDateError(id: number, hasError: boolean): void {
-  const endField = document.getElementById(`endDateField-${id}`);
+function showDateError(fieldId: string, hasError: boolean): void {
+  const endField = document.getElementById(fieldId);
   if (!endField) return;
   const existing = endField.querySelector('.field-error');
   if (hasError) {
@@ -86,12 +86,20 @@ function showDateError(id: number, hasError: boolean): void {
 
 function validateExperienceDates(item: ExperienceItem): boolean {
   if (!item.startDate || !item.endDate || item.current) {
-    showDateError(item.id, false);
+    showDateError(`endDateField-${item.id}`, false);
     return true;
   }
   const valid = item.endDate >= item.startDate;
-  showDateError(item.id, !valid);
+  showDateError(`endDateField-${item.id}`, !valid);
   return valid;
+}
+
+// Keeps "Experiência #N" / "Formação #N" / "Idioma #N" in order after removals.
+function renumberItems(listId: string, label: string): void {
+  document.querySelectorAll(`#${listId} .dynamic-item-title`).forEach((el, i) => {
+    const textNode = el.lastChild;
+    if (textNode) textNode.textContent = ` ${label} #${i + 1}`;
+  });
 }
 
 (window as any).updateExp = (id: number, key: string, value: string) => {
@@ -107,6 +115,7 @@ function validateExperienceDates(item: ExperienceItem): boolean {
   if (idx !== -1) experiences.splice(idx, 1);
   const el = document.getElementById(`exp-${id}`);
   if (el) el.remove();
+  renumberItems('experienceList', 'Experiência');
 };
 
 (window as any).toggleCurrentJob = (id: number, checked: boolean) => {
@@ -139,24 +148,24 @@ function renderEducationItem(item: EducationItem): void {
   div.id = `edu-${item.id}`;
   div.innerHTML = `
     <div class="dynamic-item-header">
-      <span class="dynamic-item-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Formação #${educations.indexOf(item) + 1}</span>
-      <button type="button" class="remove-btn" onclick="removeEducation(${item.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remover</button>
+      <span class="dynamic-item-title"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> Formação #${educations.indexOf(item) + 1}</span>
+      <button type="button" class="remove-btn" onclick="removeEducation(${item.id})"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remover</button>
     </div>
     <div class="form-grid">
       <div class="field">
-        <label>Curso / Graduação</label>
-        <input type="text" placeholder="Ex: Ciência da Computação" onchange="updateEdu(${item.id},'course',this.value)" />
+        <label for="eduCourse-${item.id}">Curso / Graduação</label>
+        <input type="text" id="eduCourse-${item.id}" placeholder="Ex: Ciência da Computação" onchange="updateEdu(${item.id},'course',this.value)" />
       </div>
       <div class="field">
-        <label>Instituição</label>
-        <input type="text" placeholder="Ex: USP" onchange="updateEdu(${item.id},'institutionName',this.value)" />
+        <label for="eduInst-${item.id}">Instituição</label>
+        <input type="text" id="eduInst-${item.id}" placeholder="Ex: USP" onchange="updateEdu(${item.id},'institutionName',this.value)" />
       </div>
       <div class="field">
-        <label>Data de Início</label>
-        <input type="month" onchange="updateEdu(${item.id},'startDate',this.value)" />
+        <label for="eduStart-${item.id}">Data de Início</label>
+        <input type="month" id="eduStart-${item.id}" onchange="updateEdu(${item.id},'startDate',this.value)" />
       </div>
-      <div class="field">
-        <label>Data de Fim</label>
+      <div class="field" id="eduEndDateField-${item.id}">
+        <label for="eduEnd-${item.id}">Data de Fim</label>
         <input type="month" id="eduEnd-${item.id}" onchange="updateEdu(${item.id},'endDate',this.value)" />
         <div class="checkbox-row">
           <input type="checkbox" id="eduCurrent-${item.id}" onchange="toggleCurrentEdu(${item.id},this.checked)" />
@@ -169,9 +178,12 @@ function renderEducationItem(item: EducationItem): void {
 }
 
 function validateEducationDates(item: EducationItem): boolean {
-  if (!item.startDate || !item.endDate || item.current) return true;
+  if (!item.startDate || !item.endDate || item.current) {
+    showDateError(`eduEndDateField-${item.id}`, false);
+    return true;
+  }
   const valid = item.endDate >= item.startDate;
-  showDateError(item.id, !valid);
+  showDateError(`eduEndDateField-${item.id}`, !valid);
   return valid;
 }
 
@@ -188,6 +200,7 @@ function validateEducationDates(item: EducationItem): boolean {
   if (idx !== -1) educations.splice(idx, 1);
   const el = document.getElementById(`edu-${id}`);
   if (el) el.remove();
+  renumberItems('educationList', 'Formação');
 };
 
 (window as any).toggleCurrentEdu = (id: number, checked: boolean) => {
@@ -299,17 +312,17 @@ function renderLanguageItem(item: LanguageItem): void {
   div.id = `lang-${item.id}`;
   div.innerHTML = `
     <div class="dynamic-item-header">
-      <span class="dynamic-item-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Idioma #${languages.indexOf(item) + 1}</span>
-      <button type="button" class="remove-btn" onclick="removeLanguage(${item.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remover</button>
+      <span class="dynamic-item-title"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Idioma #${languages.indexOf(item) + 1}</span>
+      <button type="button" class="remove-btn" onclick="removeLanguage(${item.id})"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Remover</button>
     </div>
     <div class="form-grid">
       <div class="field">
-        <label>Idioma</label>
-        <input type="text" placeholder="Ex: Inglês" onchange="updateLang(${item.id},'name',this.value)" />
+        <label for="langName-${item.id}">Idioma</label>
+        <input type="text" id="langName-${item.id}" placeholder="Ex: Inglês" onchange="updateLang(${item.id},'name',this.value)" />
       </div>
       <div class="field">
-        <label>Nível</label>
-        <select onchange="updateLang(${item.id},'proficiency',this.value)">
+        <label for="langLevel-${item.id}">Nível</label>
+        <select id="langLevel-${item.id}" onchange="updateLang(${item.id},'proficiency',this.value)">
           <option value="" disabled selected>Selecione o nível</option>
           ${options}
         </select>
@@ -329,6 +342,7 @@ function renderLanguageItem(item: LanguageItem): void {
   if (idx !== -1) languages.splice(idx, 1);
   const el = document.getElementById(`lang-${id}`);
   if (el) el.remove();
+  renumberItems('languageList', 'Idioma');
 };
 
 document.getElementById('addExperienceBtn')?.addEventListener('click', addExperience);

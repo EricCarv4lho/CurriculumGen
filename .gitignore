@@ -373,3 +373,6 @@ FodyWeavers.xsd
 
 # Local backup of old repo history
 .git_backup_oldrepo/
+
+# ZCode session artifacts
+.zcode/

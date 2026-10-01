@@ -911,41 +911,6 @@ select option { background: var(--surface); color: var(--text); }
   transform: translateY(-1px);
 }
 
-/* Review */
-.review-panel {
-  margin-top: 1.5rem;
-  padding: 1rem 1.2rem;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-.review-title {
-  font-size: .88rem;
-  font-weight: 600;
-  margin-bottom: .75rem;
-  color: var(--text);
-}
-
-.review-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .5rem;
-}
-
-.review-item { font-size: .8rem; }
-
-.review-item strong {
-  color: var(--text-secondary);
-  display: block;
-  font-size: .68rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-
-.review-item span { color: var(--text); }
-
 /* Navigation */
 .form-nav {
   display: flex;
@@ -1499,57 +1464,6 @@ select option { background: var(--surface); color: var(--text); }
   margin-right: auto;
 }
 
-/* Style options */
-.style-options {
-  margin-top: 1.2rem;
-  padding: 1rem 1.2rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  text-align: left;
-}
-
-.style-title {
-  font-size: .85rem;
-  font-weight: 600;
-  margin-bottom: .75rem;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: .45rem;
-}
-
-.style-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: .75rem;
-  align-items: end;
-}
-
-.checkbox-field { grid-column: 1 / -1; }
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--primary);
-  cursor: pointer;
-}
-
-.checkbox-label span {
-  font-size: .82rem;
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 0;
-  color: var(--text-secondary);
-}
-
 .btn-translate {
   margin-top: 1.5rem;
   background: var(--primary);
@@ -1620,12 +1534,6 @@ select option { background: var(--surface); color: var(--text); }
   font-size: .95rem;
   font-weight: 500;
   color: var(--text);
-}
-
-.loading-sub {
-  font-size: .78rem;
-  color: var(--text-secondary);
-  margin-top: .2rem;
 }
 
 /* Toast */
@@ -1760,9 +1668,121 @@ select option { background: var(--surface); color: var(--text); }
   .card { padding: 1rem 1.2rem; }
   .form-grid { grid-template-columns: 1fr; }
   .field.col-2 { grid-column: 1; }
-  .review-grid { grid-template-columns: 1fr; }
   .form-nav { flex-wrap: wrap; }
-  .style-grid { grid-template-columns: 1fr; }
   .skills-input-row { flex-direction: column; }
   .inline-add { width: 100%; margin-top: 0; }
 }
+
+/* The [hidden] attribute must always win over component display rules
+   (.field, .file-preview, …) or "hidden" elements stay visible. */
+[hidden] { display: none !important; }
+
+/* Confirm dialog */
+.confirm-message {
+  font-size: .9rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: .75rem;
+}
+
+.confirm-actions .btn { flex: 1; }
+
+.btn-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  filter: brightness(1.08);
+}
+
+/* Inline button spinner (login, etc.) */
+.btn.is-loading { pointer-events: none; opacity: .75; }
+
+.btn.is-loading::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+/* List loading / retry */
+.list-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.list-loading .spinner { margin: 0; }
+
+.retry-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: .5rem;
+}
+
+/* Disabled form controls (targetLanguage starts disabled, month inputs when "current") */
+input:disabled, select:disabled, textarea:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+}
+
+@media (max-width: 620px) {
+  /* Tabs wrap 2x2 instead of squeezing four labels into one row */
+  .tabs { flex-wrap: wrap; }
+  .tab-btn { flex: 1 1 40%; padding: .55rem .5rem; font-size: .8rem; }
+
+  /* Wizard steps: keep the horizontal scroll but signal it with edge fades */
+  .steps-nav {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+  }
+  .steps-list { min-width: 540px; }
+
+  /* Bigger circles and comfortable touch targets */
+  .step-btn::before { width: 28px; height: 28px; font-size: .75rem; }
+  .step-btn::after { top: 13px; left: calc(50% + 14px); width: calc(100% - 28px); }
+  .remove-btn { padding: .45rem .7rem; }
+  .tag-remove { width: 26px; height: 26px; align-items: center; justify-content: center; }
+  .remove-file { width: 34px; height: 34px; }
+  .settings-btn { padding: .6rem; }
+}
+
+@media (max-width: 380px) {
+  .modal-overlay { padding: 1rem; }
+  .modal-box { padding: 1.25rem 1.1rem; }
+}
+
+/* Accessibility: visible keyboard focus (replaces the outline:none resets) */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Utilities */
+.btn-block { width: 100%; justify-content: center; }
+
+.cover-generate { margin-top: 1rem; }
+
+.skills-input-row .field { flex: 1; }

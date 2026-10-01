@@ -30,11 +30,21 @@ export function getHeaders(): HeadersInit {
   return headers;
 }
 
+function throwApiError(res: Response, path: string, message: string): never {
+  // A 401 outside /auth/ means the token expired mid-session: drop it and let
+  // the "session-expired" listener re-open the login modal.
+  if (res.status === 401 && !path.startsWith('/auth/')) {
+    localStorage.removeItem('token');
+    window.dispatchEvent(new CustomEvent('session-expired'));
+  }
+  throw new ApiError(message, res.status);
+}
+
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, { headers: getHeaders() });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(toErrorMessage(res, data), res.status);
+    throwApiError(res, path, toErrorMessage(res, data));
   }
   return res.json();
 }
@@ -47,7 +57,7 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(toErrorMessage(res, data), res.status);
+    throwApiError(res, path, toErrorMessage(res, data));
   }
   return res.json();
 }
@@ -60,11 +70,10 @@ export async function apiPostBlob(path: string, body?: unknown): Promise<Blob> {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(
-      Array.isArray(data) ? data.map((e: { message: string }) => e.message).join(' | ')
-      : toErrorMessage(res, data),
-      res.status,
-    );
+    const message = Array.isArray(data)
+      ? data.map((e: { message: string }) => e.message).join(' | ')
+      : toErrorMessage(res, data);
+    throwApiError(res, path, message);
   }
   return res.blob();
 }
@@ -76,7 +85,7 @@ export async function apiDelete(path: string): Promise<void> {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(toErrorMessage(res, data), res.status);
+    throwApiError(res, path, toErrorMessage(res, data));
   }
 }
 
@@ -88,7 +97,7 @@ export async function apiPut<T>(path: string, body?: unknown): Promise<T> {
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(toErrorMessage(res, data), res.status);
+    throwApiError(res, path, toErrorMessage(res, data));
   }
   return res.json();
 }
@@ -106,7 +115,7 @@ export async function apiPostFormData(path: string, formData: FormData): Promise
   });
   if (!res.ok) {
     const data = await res.json().catch(() => null);
-    throw new ApiError(toErrorMessage(res, data), res.status);
+    throwApiError(res, path, toErrorMessage(res, data));
   }
   return res.blob();
 }

@@ -76,6 +76,10 @@ export function validateStep(step: number): boolean {
       setError('careerObjective', 'errCareerObjective', 'Objetivo obrigatório');
       valid = false;
     }
+    if (!val('highlights')) {
+      setError('highlights', 'errHighlights', 'Destaques obrigatório');
+      valid = false;
+    }
   }
 
   if (step === 3) {

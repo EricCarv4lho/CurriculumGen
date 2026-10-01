@@ -5,17 +5,19 @@ import {
   checkAuth,
   updateAuthUI,
   isAuthenticated,
+  logout,
 } from './services/auth';
 import { buildPayload, generateCurriculum, generateCoverLetter, downloadBlob } from './services/curriculum';
 import { translateCurriculum } from './services/translate';
-import { showToast, showLoading, formatFileSize } from './utils/ui';
+import { showToast, showLoading, formatFileSize, toUserMessage, showConfirm } from './utils/ui';
 import { validateStep } from './validation';
 import { listResumes, createResume, uploadResumePdf, downloadResumePdfBlob, deleteResume, getResume, templateNameToId, templateIdToName, formatDate } from './services/resumes';
 import './form-state';
 
 // ── Theme ────────────────────────────────────────────────────────────
 
-const savedTheme = localStorage.getItem('theme') || 'light';
+const savedTheme = localStorage.getItem('theme')
+  || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 document.documentElement.setAttribute('data-theme', savedTheme);
 updateSettingsThemeUI(savedTheme);
 
@@ -84,9 +86,23 @@ $.authModal?.addEventListener('click', (e: MouseEvent) => {
   }
 });
 
-$.authBtn?.addEventListener('click', () => {
+function openAuthModal(): void {
   $.authModal?.classList.add('active');
+  $.authEmail?.focus();
+}
+
+$.authBtn?.addEventListener('click', openAuthModal);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && $.authModal?.classList.contains('active')) {
+    $.authModal.classList.remove('active');
+    if ($.authError) $.authError.textContent = '';
+  }
 });
+
+// Set when the login modal was opened by clicking "Meus Currículos" while
+// logged out — after a successful login we go straight to that tab.
+let pendingResumesLoad = false;
 
 $.authForm?.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -95,6 +111,13 @@ $.authForm?.addEventListener('submit', async (e) => {
   const password = $.authPassword?.value || '';
   const name = $.authName?.value.trim() || '';
   if ($.authError) $.authError.textContent = '';
+
+  const submitBtn = $.authSubmit;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    submitBtn.textContent = isRegisterMode ? 'Cadastrando...' : 'Entrando...';
+  }
 
   try {
     if (isRegisterMode) {
@@ -105,10 +128,29 @@ $.authForm?.addEventListener('submit', async (e) => {
     updateAuthUI();
     $.authModal?.classList.remove('active');
     showToast(isRegisterMode ? 'Conta criada com sucesso!' : 'Login realizado!', 'success');
+    if (pendingResumesLoad) {
+      pendingResumesLoad = false;
+      switchTab('btn-resumes');
+    }
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Erro de conexão com o servidor.';
-    if ($.authError) $.authError.textContent = msg;
+    if ($.authError) $.authError.textContent = toUserMessage(err, 'Erro de conexão com o servidor.');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('is-loading');
+      submitBtn.textContent = isRegisterMode ? 'Cadastrar' : 'Entrar';
+    }
   }
+});
+
+// Fired by services/api.ts when a non-auth endpoint answers 401 mid-session.
+window.addEventListener('session-expired', () => {
+  logout();
+  updateAuthUI();
+  const resumesSection = document.getElementById('sectionResumes');
+  if (resumesSection && !resumesSection.hidden) loadResumes();
+  if ($.authError) $.authError.textContent = 'Sua sessão expirou. Entre novamente para continuar.';
+  openAuthModal();
 });
 
 // ── Translate ────────────────────────────────────────────────────────
@@ -117,6 +159,13 @@ let selectedFile: File | null = null;
 
 $.dropzoneArea?.addEventListener('click', () => {
   if (!selectedFile) $.fileInput?.click();
+});
+
+$.dropzoneArea?.addEventListener('keydown', (e: KeyboardEvent) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    if (!selectedFile) $.fileInput?.click();
+  }
 });
 
 $.dropzoneArea?.addEventListener('dragover', (e) => {
@@ -188,7 +237,7 @@ function updateTranslateBtn(): void {
 $.translateBtn?.addEventListener('click', async () => {
   if (!selectedFile || !$.targetLanguage?.value) return;
 
-  showLoading(true);
+  showLoading(true, 'Traduzindo seu currículo...');
   $.translateBtn!.disabled = true;
 
   try {
@@ -211,8 +260,7 @@ $.translateBtn?.addEventListener('click', async () => {
 
     showToast('Currículo traduzido e baixado com sucesso!', 'success');
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Falha na conexão com o servidor.';
-    showToast(msg, 'error');
+    showToast(toUserMessage(err), 'error');
   } finally {
     showLoading(false);
     $.translateBtn!.disabled = false;
@@ -232,7 +280,7 @@ $.form?.addEventListener('submit', async (e) => {
     return;
   }
 
-  showLoading(true);
+  showLoading(true, 'Gerando seu currículo...');
   if ($.submitBtn) $.submitBtn.disabled = true;
 
   try {
@@ -248,8 +296,7 @@ $.form?.addEventListener('submit', async (e) => {
       showToast('Currículo gerado e baixado com sucesso!', 'success');
     }
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Falha na conexão com o servidor.';
-    showToast(msg, 'error');
+    showToast(toUserMessage(err), 'error');
   } finally {
     showLoading(false);
     if ($.submitBtn) $.submitBtn.disabled = false;
@@ -265,7 +312,7 @@ async function handleGenerateCover(): Promise<void> {
     return;
   }
 
-  showLoading(true);
+  showLoading(true, 'Escrevendo sua carta...');
   if ($.coverGenerateBtn) $.coverGenerateBtn.disabled = true;
 
   try {
@@ -285,8 +332,7 @@ async function handleGenerateCover(): Promise<void> {
     if ($.coverResult) $.coverResult.hidden = false;
     showToast('Carta gerada com sucesso!', 'success');
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Falha na conexão com o servidor.';
-    showToast(msg, 'error');
+    showToast(toUserMessage(err), 'error');
   } finally {
     showLoading(false);
     if ($.coverGenerateBtn) $.coverGenerateBtn.disabled = false;
@@ -321,21 +367,23 @@ function goToStep(step: number): void {
     btn.classList.remove('active', 'done');
     if (num === step) btn.classList.add('active');
     if (num < step) btn.classList.add('done');
-    btn.setAttribute('aria-current', num === step ? 'step' : '');
+    if (num === step) btn.setAttribute('aria-current', 'step');
+    else btn.removeAttribute('aria-current');
   });
 
-  if ($.prevBtn) $.prevBtn.style.display = step > 1 ? 'inline-flex' : 'none';
-
-  if (step === TOTAL_STEPS) {
-    if ($.nextBtn) $.nextBtn.style.display = 'none';
-    if ($.submitBtn) $.submitBtn.style.display = 'inline-flex';
-  } else {
-    if ($.nextBtn) $.nextBtn.style.display = 'inline-flex';
-    if ($.submitBtn) $.submitBtn.style.display = 'none';
-  }
+  if ($.prevBtn) $.prevBtn.hidden = step <= 1;
+  if ($.nextBtn) $.nextBtn.hidden = step === TOTAL_STEPS;
+  if ($.submitBtn) $.submitBtn.hidden = step !== TOTAL_STEPS;
 
   currentStep = step;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // On narrow screens the step row scrolls horizontally — keep the active
+  // step visible instead of letting it hide past the fade.
+  document.querySelector(`.step-btn[data-step="${step}"]`)?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'nearest',
+    inline: 'center',
+  });
 }
 
 $.nextBtn?.addEventListener('click', () => {
@@ -365,6 +413,11 @@ async function loadResumes(): Promise<void> {
   }
 
   try {
+    container.innerHTML = `
+      <div class="list-loading" role="status" aria-label="Carregando currículos">
+        <div class="spinner"></div>
+      </div>`;
+
     const resumes = await listResumes();
     if (resumes.length === 0) {
       container.innerHTML = '<p class="tags-empty">Nenhum currículo salvo ainda. Gere um currículo e ele será salvo automaticamente.</p>';
@@ -379,11 +432,11 @@ async function loadResumes(): Promise<void> {
         </div>
         <div class="resume-card-actions">
           <button type="button" class="btn btn-sm btn-primary resume-download" data-id="${r.id}">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Baixar
           </button>
           <button type="button" class="btn btn-sm btn-ghost resume-delete" data-id="${r.id}">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           </button>
         </div>
       </div>
@@ -403,18 +456,30 @@ async function loadResumes(): Promise<void> {
       });
     });
   } catch {
-    container.innerHTML = '<p class="tags-empty">Erro ao carregar currículos.</p>';
+    container.innerHTML = `
+      <p class="tags-empty">Erro ao carregar currículos.</p>
+      <div class="retry-wrap">
+        <button type="button" class="btn btn-sm" id="retryResumesBtn">Tentar novamente</button>
+      </div>`;
+    document.getElementById('retryResumesBtn')?.addEventListener('click', () => loadResumes());
   }
+}
+
+function setResumeOverlayMessage(message: string): void {
+  const text = document.querySelector('#resumeLoadingOverlay .loading-text');
+  if (text) text.textContent = message;
 }
 
 async function downloadResume(id: number): Promise<void> {
   const overlay = document.getElementById('resumeLoadingOverlay');
+  setResumeOverlayMessage('Preparando download...');
   if (overlay) overlay.classList.add('active');
 
   try {
     const resume = await getResume(id);
 
     if (resume.hasPdf) {
+      setResumeOverlayMessage('Baixando PDF...');
       const blob = await downloadResumePdfBlob(id);
       downloadBlob(blob, `${resume.name}.pdf`);
       showToast('Currículo baixado com sucesso!', 'success');
@@ -425,39 +490,50 @@ async function downloadResume(id: number): Promise<void> {
       showToast('Este currículo está incompleto e não pode ser baixado. Remova-o e crie um novo.', 'warning');
       return;
     }
+    setResumeOverlayMessage('Gerando PDF...');
     const blob = await generateCurriculum(resume.data);
     downloadBlob(blob, `curriculo_${resume.data.fullName.replace(/\s+/g, '_')}.pdf`);
     showToast('Currículo baixado com sucesso!', 'success');
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Erro ao baixar currículo.';
-    showToast(msg, 'error');
+    showToast(toUserMessage(err, 'Erro ao baixar currículo.'), 'error');
   } finally {
     if (overlay) overlay.classList.remove('active');
   }
 }
 
 async function removeResume(id: number): Promise<void> {
+  const confirmed = await showConfirm('Excluir este currículo? Esta ação não pode ser desfeita.', 'Excluir');
+  if (!confirmed) return;
   try {
     await deleteResume(id);
     showToast('Currículo removido.', 'success');
     await loadResumes();
-  } catch {
-    showToast('Erro ao remover currículo.', 'error');
+  } catch (err: unknown) {
+    showToast(toUserMessage(err, 'Erro ao remover currículo.'), 'error');
   }
 }
 
 function switchTab(tabId: string): void {
-  document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
-  document.getElementById(tabId)?.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach((b) => {
+    const active = b.id === tabId;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
 
   if (tabId === 'btn-resumes') {
     if (!isAuthenticated()) {
-      $.authModal?.classList.add('active');
+      pendingResumesLoad = true;
+      openAuthModal();
       document.getElementById('sectionCreateForm')!.hidden = false;
       document.getElementById('sectionTranslateForm')!.hidden = true;
       document.getElementById('sectionCover')!.hidden = true;
       document.getElementById('sectionResumes')!.hidden = true;
-      document.getElementById('btn-createForm')?.classList.add('active');
+      const createBtn = document.getElementById('btn-createForm');
+      createBtn?.classList.add('active');
+      createBtn?.setAttribute('aria-selected', 'true');
+      const resumesBtn = document.getElementById('btn-resumes');
+      resumesBtn?.classList.remove('active');
+      resumesBtn?.setAttribute('aria-selected', 'false');
       return;
     }
     document.getElementById('sectionCreateForm')!.hidden = true;
@@ -487,14 +563,42 @@ function escHtml(s: string): string {
 // ── Template Selector ────────────────────────────────────────────────
 
 document.querySelectorAll('.template-card').forEach((card) => {
-  card.addEventListener('click', () => {
-    document.querySelectorAll('.template-card').forEach((c) => c.classList.remove('selected'));
-    card.classList.add('selected');
-    const val = (card as HTMLElement).dataset.template ?? 'classic';
+  const selectCard = (target: Element) => {
+    document.querySelectorAll('.template-card').forEach((c) => {
+      c.classList.remove('selected');
+      c.setAttribute('aria-pressed', 'false');
+    });
+    target.classList.add('selected');
+    target.setAttribute('aria-pressed', 'true');
+    const val = (target as HTMLElement).dataset.template ?? 'classic';
     const select = document.getElementById('templateSelect') as HTMLSelectElement | null;
     if (select) select.value = val;
+  };
+
+  card.addEventListener('click', () => selectCard(card));
+  (card as HTMLElement).addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      selectCard(card);
+    }
   });
 });
+
+// ── Character counters ───────────────────────────────────────────────
+
+function bindCharCounter(textareaId: string, counterId: string): void {
+  const textarea = document.getElementById(textareaId) as HTMLTextAreaElement | null;
+  const counter = document.getElementById(counterId);
+  if (!textarea || !counter) return;
+  const update = () => {
+    counter.textContent = `${textarea.value.length} / ${textarea.maxLength}`;
+  };
+  textarea.addEventListener('input', update);
+  update();
+}
+
+bindCharCounter('careerObjective', 'countCareerObjective');
+bindCharCounter('highlights', 'countHighlights');
 
 // ── Init ─────────────────────────────────────────────────────────────
 
@@ -502,3 +606,6 @@ checkAuth().then(() => {
   updateAuthUI();
   goToStep(1);
 });
+
+// Every SVG in the app is a decorative icon next to a text label.
+document.querySelectorAll('svg').forEach((s) => s.setAttribute('aria-hidden', 'true'));
