@@ -83,3 +83,6 @@ a cada 10 minutos. Isso evita o cold start do Render. Não evita a pausa do Supa
 - **Erro de conexão com banco nos logs** (Render → **Events/Logs**): confira a string
   (Supabase: session pooler porta 5432; senha com caracteres especiais precisa URL-encode).
 - **`/api` retorna 404 na Vercel**: o `vercel.json` ainda está com a URL placeholder — passo 3.4.
+- **"Deployment was blocked" na Vercel** (repo público): a Vercel bloqueia deploys de commits
+  cujo email do autor git não pertence à conta. Confira `git config user.email` — precisa ser
+  o mesmo email da conta GitHub/Vercel (ex.: `git config --global user.email seu@email.com`).
