@@ -23,6 +23,17 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// Match the password promised in the signup form ("Mínimo 6 caracteres")
+// instead of Identity's defaults (symbol, digit, uppercase…).
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+});
+
 // 3. JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(options =>
@@ -114,7 +125,7 @@ builder.Services.AddHttpClient<IAiSuggestionService, AiSuggestionService>();
 builder.Services.AddScoped<CurriculumService>();
 builder.Services.AddScoped<IPdfExtractionService, PdfExtractionService>();
 builder.Services.AddScoped<IUsageGuardService, UsageGuardService>();
-builder.Services.AddScoped<ResumeService>();
+builder.Services.AddScoped<IResumeService, ResumeService>();
 builder.Services.AddScoped<IValidator<Curriculum>, CurriculumValidator>();
 builder.Services.AddSingleton(TimeProvider.System);
 
